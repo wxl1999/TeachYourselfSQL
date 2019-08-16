@@ -532,26 +532,125 @@ DROP TABLE CustCopy;
 
 RENAME TABLE old_table_name TO new_table_name;
 
+## 使用视图
 
+### 视图
 
+视图是虚拟的表。它们包含的不是数据而是根据需要检索数据的查询。
 
+视图仅仅是用来查看存储在别处数据的一种设施。视图本身不包含数据，因此返回的数据是从其他表中检索出来的。
 
+在添加或更改这些表中的数据时，视图将返回改变过的数据。
 
+视图提供了一种封装 SELECT 语句的层次，可用来简化数据处理，重新 格式化或保护基础数据。 
 
+#### 作用
 
+- 重用 SQL语句。 
+- 简化复杂的 SQL操作，不必知道基本查询细节。
+- 使用表的一部分而不是整个表。
+- 保护数据。可以授予用户访问表的特定部分的权限，而不是整个表的访问权限。 
+- 更改数据格式和表示。视图可返回与底层表的表示和格式不同的数据。
 
+> 如果你用多个联结和过滤创建了复杂的视图或者嵌 套了视图，性能可能会下降得很厉害
+> 
 
+#### 规则和限制
 
+- 视图必须唯一命名
+- 对于可以创建的视图数目没有限制。 
+- 创建视图，必须具有足够的访问权限
+- 视图可以嵌套，所允许的嵌套层数在不同的 DBMS中有所不同，嵌套视图可能会 严重降低查询的性能
+- 许多 DBMS禁止在视图查询中使用 ORDER BY 子句
+- 有些 DBMS要求对返回的所有列进行命名，如果列是计算字段，则需 要使用别名
+- 视图不能索引，也不能有关联的触发器或默认值。 
+- 有些 DBMS把视图作为只读的查询
+- 有些 DBMS 允许创建这样的视图，它不能进行导致行不再属于视图的 插入或更新
 
+### 视图创建与删除
 
+- 创建
 
+`CREATE VIEW viewname;`
 
+- 删除
 
+`DROP VIEW viewname;`
 
+覆盖（或更新）视图，必须先删除它，然后再重新创建。 
 
+### 应用
 
+#### 简化复杂的联结 
 
+- 示例
 
+```mysql
+-- 创建视图
+CREATE VIEW ProductCustomers AS 
+SELECT cust_name, cust_contact, prod_id 
+FROM Customers, Orders, OrderItems 
+WHERE Customers.cust_id = Orders.cust_id  
+AND OrderItems.order_num = Orders.order_num; 
+
+-- 检索
+SELECT cust_name, cust_contact 
+FROM ProductCustomers 
+WHERE prod_id = 'RGAN01';
 ```
 
+#### 重新格式化检索出的数据 
+
+- 示例
+
+```mysql
+CREATE VIEW VendorLocations AS 
+SELECT CONCAT(RTRIM(vend_name), ' (', RTRIM(vend_country), ')')   		 AS vend_title 
+FROM Vendors;
 ```
+
+#### 过滤不想要的数据
+
+- 示例
+
+```mysql
+CREATE VIEW CustomerEMailList AS 
+SELECT cust_id, cust_name, cust_email 
+FROM Customers 
+WHERE cust_email IS NOT NULL; 
+```
+
+#### 计算字段
+
+- 示例
+
+```mysql
+CREATE VIEW OrderItemsExpanded AS 
+SELECT order_num,        
+		prod_id,        
+		quantity, 
+		item_price,        
+		quantity*item_price AS expanded_price 
+FROM OrderItems; 
+```
+
+创建不绑定特定数据的视图, 这样做不需要创 建和维护多个类似视图
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
